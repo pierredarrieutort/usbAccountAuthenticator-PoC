@@ -1,0 +1,19 @@
+{
+  "name": "usbaccountauthenticator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.html --https"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "regenerator-runtime": "^0.13.7"
+  },
+  "devDependencies": {
+    "sass": "^1.30.0"
+  }
+}

@@ -1,0 +1,51 @@
+body {
+    background: #121212;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+
+    #logs {
+        background: #444;
+        width: max-content;
+        padding: 1ch;
+        line-height: 1;
+        font-family: sans-serif;
+        border-radius: 10px;
+        height: 50ch;
+        overflow: hidden;
+
+        &:empty {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 70ch;
+
+            &::after {
+                content: 'Please reload to select a new USB device or plug at least one';
+                color: #eee;
+                text-align: center;
+                width: 100%;
+                position: absolute;
+            }
+        }
+
+        i {
+            opacity: .8;
+            font-weight: bold;
+            color: #eee;
+        }
+
+        span {
+            &.authorized {
+                color: green;
+            }
+
+            &.unauthorized {
+                color: red;
+            }
+        }
+    }
+}
