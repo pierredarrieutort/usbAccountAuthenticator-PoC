@@ -2,61 +2,73 @@ import regeneratorRuntime from 'regenerator-runtime'
 import bcrypt from 'bcrypt-nodejs'
 
 
-class devicesAware {
-    constructor() {
-        this.devices = []
+class DevicesAware {
+  constructor () {
+    this.devices = []
+    this.LOGS = document.getElementById('logs')
+    this.GOOD_SERIAL = '$2a$10$qhs.81riukufPFc9oytCNeVwe0kBAJrVXn0bbQdSRJT20jowsMkHu'
+  }
 
-        this.GOOD_SERIAL = '$2a$10$qhs.81riukufPFc9oytCNeVwe0kBAJrVXn0bbQdSRJT20jowsMkHu'
+  start () {
+    this.initialization()
+    this.listenersActivation()
+  }
 
-        this.initialization()
-        this.listenersActivation()
+  listenersActivation () {
+    navigator.usb.onconnect = ({ device }) => {
+      this.LOGS.innerHTML += `<p>Connected : ${device.serialNumber}</p>`
+      this.serialChecker(device)
     }
+    navigator.usb.ondisconnect = ({ device }) => this.LOGS.innerHTML += `<p>Disconnected : ${device.serialNumber}</p>`
+  }
 
-    listenersActivation() {
-        navigator.usb.onconnect = ({ device }) => {
-            // console.log('connected', device.serialNumber)
-            this.serialChecker(device)
-        }
-        // navigator.usb.ondisconnect = ({ device }) => console.log('disconnected', device.serialNumber)
+  async initialization () {
+    const devices = await navigator.usb.getDevices()
+    this.devicesListing(devices)
+  }
+
+  devicesListing (devices) {
+    console.log(devices)
+    if (devices.length) {
+      for (let i = 0; i < devices.length; i++) {
+        this.deviceHandling(devices[i])
+      }
+    } else {
+      const btn = document.createElement('button')
+      btn.onclick = this.addNewDevice.bind(this)
+      btn.textContent = 'Click here to add a new device'
+      document.body.append(btn)
     }
+  }
 
-    async initialization() {
-        const devices = await navigator.usb.getDevices()
-        return this.devicesListing(devices)
-    }
+  async addNewDevice () {
+    const device = await navigator.usb.requestDevice({ filters: [] })
+    console.log(device)
+    this.LOGS.innerHTML += `<p>New Device linked : ${device.serialNumber}</p>`
+    this.serialChecker(device)
+  }
 
-    async devicesListing(devices) {
-        if (!devices.length) {
-            const newDevice = await navigator.usb.requestDevice({ filters: [] })
-            return this.serialChecker(newDevice)
-        } else {
-            for (let i = 0; i < devices.length; i++) {
-                this.deviceHandling(devices[i])
-            }
-        }
-    }
+  deviceHandling (currentDevice) {
+    this.serialChecker(currentDevice)
 
-    deviceHandling(currentDevice) {
-        this.serialChecker(currentDevice)
+    if (!this.devices.includes(currentDevice))
+      this.devices.push(currentDevice)
+  }
 
-        if (!this.devices.includes(currentDevice))
-            this.devices.push(currentDevice)
-    }
+  serialChecker ({ productId = 0, serialNumber, vendorId = 0 }) {
+    const
+      UID = productId + serialNumber + vendorId, // fresh new UID
+      cryptedUID = bcrypt.hashSync(UID) // UID to send in database
 
-    serialChecker({ productId = 0, serialNumber, vendorId = 0 }) {
-        const
-            UID = productId + serialNumber + vendorId, // fresh new UID
-            cryptedUID = bcrypt.hashSync(UID) // UID to send in database
-
-        console.info('checking : ' + `%c ${cryptedUID}`, bcrypt.compareSync(UID, this.GOOD_SERIAL) ? 'color: green' : 'color: red')
-        document.getElementById('logs').innerHTML += `
+    this.LOGS.innerHTML += `
         <p>
             <i>checking :</i>
             <span class="${bcrypt.compareSync(UID, this.GOOD_SERIAL) ? 'authorized' : 'unauthorized'}">
                 ${cryptedUID}
             </span/>
         </p>`
-    }
+  }
 }
 
-new devicesAware()
+const devicesAware = new DevicesAware()
+devicesAware.start()
