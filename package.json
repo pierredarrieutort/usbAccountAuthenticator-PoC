@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "parcel index.html --https --no-cache"
+    "dev": "parcel index.html --https --no-cache",
+    "prebuild": "rimraf ./dist ./.cache",
+    "build": "parcel build index.html"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.5",
+    "rimraf": "^2.7.1",
     "sass": "^1.32.11"
   }
 }
